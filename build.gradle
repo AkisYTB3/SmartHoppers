@@ -18,10 +18,12 @@ repositories {
     mavenCentral()
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
     maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    maven { url 'https://repo.nexomc.com/releases' }
 }
 
 dependencies {
-    compileOnly('io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT')
+    compileOnly("io.papermc.paper:paper-api:${paperapi}")
+    compileOnly("com.nexomc:nexo:${nexo}")
 }
 
 tasks {

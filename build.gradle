@@ -6,7 +6,13 @@ plugins {
 }
 
 group = project.group
-version = project.version
+
+def gitVersion = versionDetails()
+def gitHash = gitVersion.gitHash.substring(0, 7)
+
+version = project.version.toString().endsWith("-dev") ?
+        "${project.version}-${gitHash}" :
+        project.version
 
 repositories {
     mavenCentral()

@@ -30,6 +30,22 @@ dependencies {
     implementation("co.aikar:acf-paper:${paperacf}")
 }
 
+shadowJar {
+    relocate 'co.aikar.commands', 'org.notionsmp.smarthoppers.acf'
+    relocate 'co.aikar.locales', 'org.notionsmp.smarthoppers.locales'
+
+    exclude('org.projectlombok:lombok:.*', 'net.kyori:.*')
+    exclude 'META-INF/**'
+
+    minimize()
+
+    archiveClassifier.set('')
+}
+
+jar.enabled = false
+
+tasks.build.dependsOn tasks.shadowJar
+
 tasks {
     runServer {
         minecraftVersion('1.21.4')

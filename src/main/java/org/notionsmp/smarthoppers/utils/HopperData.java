@@ -16,11 +16,12 @@ public class HopperData implements ConfigurationSerializable {
         FilterItem newFilter = new FilterItem(item.clone(), exactMatch);
 
         boolean alreadyExists = filterItems.stream().anyMatch(fi -> {
-            if (exactMatch) {
+            if (exactMatch && fi.isExactMatch()) {
                 return fi.getItem().equals(newFilter.getItem());
-            } else {
+            } else if (!exactMatch && !fi.isExactMatch()) {
                 return fi.getItem().getType() == newFilter.getItem().getType();
             }
+            return false;
         });
 
         if (!alreadyExists) {

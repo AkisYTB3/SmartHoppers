@@ -19,6 +19,7 @@ repositories {
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
     maven { url 'https://oss.sonatype.org/content/groups/public/' }
     maven { url 'https://repo.nexomc.com/releases' }
+    maven { url 'https://repo.aikar.co/content/groups/aikar/' }
 }
 
 dependencies {
@@ -26,6 +27,7 @@ dependencies {
     compileOnly("com.nexomc:nexo:${nexo}")
     compileOnly("org.projectlombok:lombok:${lombok}")
     annotationProcessor("org.projectlombok:lombok:${lombok}")
+    implementation("co.aikar:acf-paper:${paperacf}")
 }
 
 tasks {

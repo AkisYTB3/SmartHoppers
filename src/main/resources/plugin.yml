@@ -2,6 +2,6 @@ name: SmartHoppers
 version: ${version}
 main: org.notionsmp.smarthoppers.SmartHoppers
 api-version: '1.21'
-load: STARTUP
+load: POSTWORLD
 author: "Akis (discord: yeahakis)"
 softdepend: [Nexo]

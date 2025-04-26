@@ -1,0 +1,52 @@
+items:
+  enabled:
+    material: GREEN_WOOL # can also be "nexo-nexoid" this doesn't need to have settings.use-nexo enabled - Required
+    itemname: "<green>Enabled!" # Required
+    lore: [] # Optional
+    custom_model_data: 1000 # Optional
+    Components: # Optional
+      glint: true
+#      damage: 5 # If you have a damageable item, you can set its durability
+#      itemmodel: ItemModel # only available for versions 1.21.2+
+#      hide_tooltip: false # only available for versions 1.21.2+
+#      tooltip_stlye: "some:tooltip" # only for versions 1.21.2+
+  disabled:
+    material: RED_WOOL
+    itemname: "<red>Disabled!"
+  whitelist:
+    material: WHITE_WOOL
+    itemname: "Whitelist"
+  blacklist:
+    material: BLACK_WOOL
+    itemname: "Blacklist"
+  placeholder:
+    material: GRAY_STAINED_GLASS_PANE
+    itemname: ""
+#    Components: # it is recommended to uncomment this if you're on 1.21.2 or higher
+#      hide_tooltip: true
+  next_page:
+    material: PAPER
+    itemname: "Next Page"
+    lore:
+      - "Page: <page_number>"
+  previous_page:
+    material: PAPER
+    itemname: "Previous Page"
+    lore:
+      - "Page: <page_number>"
+
+exact_match_description:
+  - "<dark_red>Exact match"
+  - "<red>Exact match means that the item"
+  - "<red>needs to have the same Lore, Name, CMD, etc.."
+
+
+settings:
+  title: "Hopper settings" # supports placeholders and minimessage
+  slots:
+    placeholder: [ "0..8", "45..53", "27", "36" ] # the full first and last rows (0-8 and 45-53) and slots 27 and 36 will be placeholder item
+    toggle: 9
+    whitelist: 18
+    items: [10..17, 19..26, 28..35, 37..44]
+    next_page: 50 # Even though a placeholder is already in this slot, next_page and previous_page take priority, same goes for toggle and whitelist
+    previous_page: 48

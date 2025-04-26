@@ -1,0 +1,26 @@
+hopper-item:
+  enabled: true # if false, it will instead open the menu when shift right-clicking with an empty hand
+  itemname: <gold>Hopper Item # Required
+  lore: # Optional
+    - "<gray><!i>Right click a hopper to open it's settings"
+  custom-model-data: 1000 # Optional
+  material: IRON_SHOVEL # Required
+  Components: # Optional
+    glint: true
+#    damage: 5 # If you have a damageable item, you can set its durability
+#    itemmodel: ItemModel # only available for versions 1.21.2+
+#    hide_tooltip: false # only available for versions 1.21.2+
+#    tooltip_style: "some:tooltip" # only for versions 1.21.2+
+  recipe:
+    enabled: true # if disabled you need to run /smarthoppers item to obtain
+    shape:
+      - 'CGC'
+      - 'RSR'
+      - 'CGC'
+    ingredients:
+      C: COPPER_INGOT
+      G: GOLD_INGOT
+      R: REDSTONE
+      S: IRON_SHOVEL
+settings:
+  use-nexo: false # whether Nexo should be used for the custom gui - enabling overrides your settings.* in gui.yml

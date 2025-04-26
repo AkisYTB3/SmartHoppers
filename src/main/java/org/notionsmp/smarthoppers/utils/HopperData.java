@@ -3,7 +3,6 @@ package org.notionsmp.smarthoppers.utils;
 import lombok.Data;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.*;
 
 @Data
@@ -14,29 +13,38 @@ public class HopperData implements ConfigurationSerializable {
     private boolean enabled = false;
 
     public void addFilterItem(ItemStack item, boolean exactMatch) {
-        filterItems.add(new FilterItem(item, exactMatch));
+        FilterItem newFilter = new FilterItem(item.clone(), exactMatch);
+
+        boolean alreadyExists = filterItems.stream().anyMatch(fi -> {
+            if (exactMatch) {
+                return fi.getItem().equals(newFilter.getItem());
+            } else {
+                return fi.getItem().getType() == newFilter.getItem().getType();
+            }
+        });
+
+        if (!alreadyExists) {
+            filterItems.add(newFilter);
+        }
     }
 
     public void removeFilterItem(ItemStack item) {
-        filterItems.removeIf(filterItem -> filterItem.getItem().isSimilar(item));
+        filterItems.removeIf(fi -> fi.getItem().equals(item));
     }
 
     public FilterItem getFilterItem(ItemStack item) {
-        for (FilterItem filterItem : filterItems) {
-            if (filterItem.getItem().isSimilar(item)) {
-                return filterItem;
-            }
-        }
-        return null;
+        return filterItems.stream()
+                .filter(fi -> fi.getItem().equals(item))
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean isItemAllowed(ItemStack item) {
-        for (FilterItem filterItem : filterItems) {
-            if (filterItem.getItem().isSimilar(item)) {
-                return whitelist;
-            }
-        }
-        return !whitelist;
+        return filterItems.stream()
+                .filter(fi -> fi.isExactMatch() ? fi.getItem().equals(item) : fi.getItem().getType() == item.getType())
+                .findFirst()
+                .map(fi -> whitelist)
+                .orElse(!whitelist);
     }
 
     @Override
@@ -53,27 +61,28 @@ public class HopperData implements ConfigurationSerializable {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     public static HopperData deserialize(Map<String, Object> map) {
         HopperData data = new HopperData();
-
-        try {
-            if (map.containsKey("filterItems")) {
-                List<?> rawList = (List<?>) map.get("filterItems");
-                for (Object itemObj : rawList) {
-                    if (itemObj instanceof Map) {
-                        Map<String, Object> itemMap = (Map<String, Object>) itemObj;
-                        data.filterItems.add(FilterItem.deserialize(itemMap));
+        if (map.containsKey("filterItems")) {
+            Object rawList = map.get("filterItems");
+            if (rawList instanceof List<?> list) {
+                for (Object itemObj : list) {
+                    if (itemObj instanceof Map<?, ?> itemMap) {
+                        data.filterItems.add(FilterItem.deserialize((Map<String, Object>) itemMap));
                     }
                 }
             }
-
-            data.whitelist = (boolean) map.getOrDefault("whitelist", true);
-            data.currentPage = (int) map.getOrDefault("currentPage", 0);
-            data.enabled = (boolean) map.getOrDefault("enabled", false);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
+        if (map.containsKey("whitelist")) {
+            data.whitelist = (boolean) map.get("whitelist");
+        }
+        if (map.containsKey("currentPage")) {
+            data.currentPage = (int) map.get("currentPage");
+        }
+        if (map.containsKey("enabled")) {
+            data.enabled = (boolean) map.get("enabled");
+        }
         return data;
     }
 }

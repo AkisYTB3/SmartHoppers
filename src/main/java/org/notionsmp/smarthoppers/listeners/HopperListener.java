@@ -16,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.notionsmp.smarthoppers.SmartHoppers;
 import org.notionsmp.smarthoppers.utils.FilterItem;
 import org.notionsmp.smarthoppers.utils.HopperData;
-
 import java.util.Objects;
 
 public class HopperListener implements Listener {
@@ -28,7 +27,6 @@ public class HopperListener implements Listener {
         if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
         if (!(Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Hopper hopper)) return;
         if (!event.getPlayer().hasPermission("smarthoppers.use")) return;
-
         boolean useItem = SmartHoppers.getInstance().getConfigManager().getConfig().getBoolean("hopper-item.enabled");
         if (useItem) {
             ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
@@ -46,20 +44,15 @@ public class HopperListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.getClickedInventory() == null) return;
-
         FileConfiguration guiConfig = SmartHoppers.getInstance().getConfigManager().getGuiConfig();
         String title = guiConfig.getString("settings.title");
         if (title == null || !event.getView().title().equals(miniMessage.deserialize(title))) return;
-
         event.setCancelled(true);
-
         HopperData hopperData = SmartHoppers.getInstance().getGuiManager().getPlayerEditingData(player);
         if (hopperData == null) return;
-
         int clickedSlot = event.getSlot();
         InventoryType clickedInventoryType = event.getClickedInventory().getType();
         ItemStack clickedItem = event.getCurrentItem();
-
         if (clickedInventoryType == InventoryType.CHEST) {
             if (clickedSlot == guiConfig.getInt("settings.slots.toggle")) {
                 hopperData.setEnabled(!hopperData.isEnabled());
@@ -70,18 +63,20 @@ public class HopperListener implements Listener {
             } else if (clickedSlot == guiConfig.getInt("settings.slots.previous_page")) {
                 hopperData.setCurrentPage(Math.max(0, hopperData.getCurrentPage() - 1));
             } else if (clickedItem != null && !clickedItem.getType().isAir()) {
-                if (event.getClick() == ClickType.RIGHT) {
-                    FilterItem filterItem = hopperData.getFilterItem(clickedItem);
-                    if (filterItem != null) {
+                FilterItem filterItem = SmartHoppers.getInstance().getGuiManager().getFilterSlot(player, clickedSlot);
+                if (filterItem != null) {
+                    if (event.getClick() == ClickType.RIGHT) {
                         filterItem.setExactMatch(!filterItem.isExactMatch());
+                    } else {
+                        hopperData.removeFilterItem(filterItem.getItem());
                     }
-                } else {
-                    hopperData.removeFilterItem(clickedItem);
                 }
             }
             SmartHoppers.getInstance().getGuiManager().refreshHopperGUI(player, (Hopper) event.getInventory().getHolder());
         } else if (clickedInventoryType == InventoryType.PLAYER && clickedItem != null && !clickedItem.getType().isAir()) {
-            hopperData.addFilterItem(clickedItem.clone(), false);
+            ItemStack singleItem = clickedItem.clone();
+            singleItem.setAmount(1);
+            hopperData.addFilterItem(singleItem, false);
             SmartHoppers.getInstance().getGuiManager().refreshHopperGUI(player, (Hopper) event.getInventory().getHolder());
         }
     }

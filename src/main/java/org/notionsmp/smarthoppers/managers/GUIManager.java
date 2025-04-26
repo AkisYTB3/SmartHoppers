@@ -14,17 +14,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.notionsmp.smarthoppers.SmartHoppers;
 import org.notionsmp.smarthoppers.utils.FilterItem;
 import org.notionsmp.smarthoppers.utils.HopperData;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 public class GUIManager {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private Map<String, GUIItem> guiItems = new HashMap<>();
-    private Map<Player, HopperData> playerEditingMap = new HashMap<>();
+    private final Map<String, GUIItem> guiItems = new HashMap<>();
+    private final Map<Player, HopperData> playerEditingMap = new HashMap<>();
+    private final Map<UUID, Map<Integer, FilterItem>> playerFilterSlotMap = new HashMap<>();
 
     public GUIManager() {
         loadGUIItems();
@@ -45,22 +42,23 @@ public class GUIManager {
     public void openHopperGUI(Player player, Hopper hopper) {
         HopperData hopperData = SmartHoppers.getInstance().getHopperManager().getHopperData(hopper);
         if (hopperData == null) return;
-
         playerEditingMap.put(player, hopperData);
+        clearFilterSlots(player);
         FileConfiguration guiConfig = SmartHoppers.getInstance().getConfigManager().getGuiConfig();
         Component title = miniMessage.deserialize(guiConfig.getString("settings.title", "<gray>Smart Hopper Settings"));
         Inventory gui = Bukkit.createInventory(null, 54, title);
-        setupGUI(gui, hopperData);
+        setupGUI(player, gui, hopperData);
         player.openInventory(gui);
     }
 
     public void refreshHopperGUI(Player player, Hopper hopper) {
         Inventory openInventory = player.getOpenInventory().getTopInventory();
-        setupGUI(openInventory, playerEditingMap.get(player));
+        clearFilterSlots(player);
+        setupGUI(player, openInventory, playerEditingMap.get(player));
         player.updateInventory();
     }
 
-    private void setupGUI(Inventory gui, HopperData hopperData) {
+    private void setupGUI(Player player, Inventory gui, HopperData hopperData) {
         FileConfiguration guiConfig = SmartHoppers.getInstance().getConfigManager().getGuiConfig();
         gui.clear();
 
@@ -70,35 +68,34 @@ public class GUIManager {
                 int from = Integer.parseInt(parts[0]);
                 int to = Integer.parseInt(parts[1]);
                 for (int i = from; i <= to; i++) {
-                    gui.setItem(i, createGUIItem("placeholder"));
+                    gui.setItem(i, createGUIItem("placeholder", hopperData));
                 }
             } else {
-                gui.setItem(Integer.parseInt(slotStr), createGUIItem("placeholder"));
+                gui.setItem(Integer.parseInt(slotStr), createGUIItem("placeholder", hopperData));
             }
         }
 
         gui.setItem(guiConfig.getInt("settings.slots.toggle"),
-                hopperData.isEnabled() ? createGUIItem("enabled") : createGUIItem("disabled"));
+                hopperData.isEnabled() ? createGUIItem("enabled", hopperData) : createGUIItem("disabled", hopperData));
 
         gui.setItem(guiConfig.getInt("settings.slots.whitelist"),
-                hopperData.isWhitelist() ? createGUIItem("whitelist") : createGUIItem("blacklist"));
+                hopperData.isWhitelist() ? createGUIItem("whitelist", hopperData) : createGUIItem("blacklist", hopperData));
 
         int itemsPerPage = getItemsPerPage();
         int start = hopperData.getCurrentPage() * itemsPerPage;
         int end = Math.min(start + itemsPerPage, hopperData.getFilterItems().size());
 
         if (hopperData.getFilterItems().size() > end) {
-            gui.setItem(guiConfig.getInt("settings.slots.next_page"), createGUIItem("next_page"));
+            gui.setItem(guiConfig.getInt("settings.slots.next_page"), createGUIItem("next_page", hopperData));
         }
         if (hopperData.getCurrentPage() > 0) {
-            gui.setItem(guiConfig.getInt("settings.slots.previous_page"), createGUIItem("previous_page"));
+            gui.setItem(guiConfig.getInt("settings.slots.previous_page"), createGUIItem("previous_page", hopperData));
         }
 
         for (int i = start; i < end; i++) {
             FilterItem filterItem = hopperData.getFilterItems().get(i);
             ItemStack item = filterItem.getItem().clone();
             ItemMeta meta = item.getItemMeta();
-
             List<Component> lore = meta.lore() != null ? meta.lore() : new ArrayList<>();
             if (filterItem.isExactMatch()) {
                 for (String line : guiConfig.getStringList("exact_match_description")) {
@@ -107,7 +104,9 @@ public class GUIManager {
             }
             meta.lore(lore);
             item.setItemMeta(meta);
-            gui.setItem(getItemSlot(i - start), item);
+            int slot = getItemSlot(i - start);
+            gui.setItem(slot, item);
+            setFilterSlot(player, slot, filterItem);
         }
     }
 
@@ -141,15 +140,19 @@ public class GUIManager {
         return -1;
     }
 
-    public ItemStack createGUIItem(String type) {
+    public ItemStack createGUIItem(String type, HopperData hopperData) {
         GUIItem guiItem = guiItems.get(type);
         if (guiItem == null) return null;
         ItemStack item = new ItemStack(guiItem.getMaterial());
         ItemMeta meta = item.getItemMeta();
+        List<String> processedLore = new ArrayList<>();
+        for (String line : guiItem.getLore()) {
+            processedLore.add(line.replace("<page_number>", String.valueOf(hopperData.getCurrentPage() + 1)));
+        }
         meta.displayName(miniMessage.deserialize(guiItem.getItemName()));
-        if (!guiItem.getLore().isEmpty()) {
+        if (!processedLore.isEmpty()) {
             List<Component> loreComponents = new ArrayList<>();
-            guiItem.getLore().forEach(line -> loreComponents.add(miniMessage.deserialize(line)));
+            processedLore.forEach(line -> loreComponents.add(miniMessage.deserialize(line)));
             meta.lore(loreComponents);
         }
         if (guiItem.getCustomModelData() != 0) meta.setCustomModelData(guiItem.getCustomModelData());
@@ -164,6 +167,21 @@ public class GUIManager {
 
     public void removePlayerEditing(Player player) {
         playerEditingMap.remove(player);
+        clearFilterSlots(player);
+    }
+
+    public void setFilterSlot(Player player, int slot, FilterItem filterItem) {
+        playerFilterSlotMap.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>()).put(slot, filterItem);
+    }
+
+    public FilterItem getFilterSlot(Player player, int slot) {
+        Map<Integer, FilterItem> map = playerFilterSlotMap.get(player.getUniqueId());
+        if (map == null) return null;
+        return map.get(slot);
+    }
+
+    public void clearFilterSlots(Player player) {
+        playerFilterSlotMap.remove(player.getUniqueId());
     }
 
     @Getter

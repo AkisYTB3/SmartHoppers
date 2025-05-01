@@ -16,6 +16,7 @@ import org.notionsmp.smarthoppers.managers.ConfigManager;
 import org.notionsmp.smarthoppers.managers.GUIManager;
 import org.notionsmp.smarthoppers.managers.HopperManager;
 import org.notionsmp.smarthoppers.managers.ItemManager;
+import org.notionsmp.smarthoppers.utils.Metrics;
 
 import java.util.List;
 
@@ -43,6 +44,12 @@ public final class SmartHoppers extends JavaPlugin {
         commandManager.registerCommand(new SmartHoppersCommand());
 
         registerRecipe();
+
+        initMetrics();
+    }
+
+    private void initMetrics() {
+        Metrics metrics = new Metrics(this, 25706);
     }
 
     private void registerRecipe() {

@@ -16,12 +16,13 @@ public class HopperTransferListener implements Listener {
     public void onItemMove(InventoryMoveItemEvent event) {
         Inventory source = event.getSource();
         Inventory destination = event.getDestination();
+        Inventory initiator = event.getInitiator();
 
         if (destination.getHolder() instanceof Hopper destHopper) {
             HopperData hopperData = SmartHoppers.getInstance().getHopperManager().getHopperData(destHopper);
             if (hopperData == null || !hopperData.isEnabled()) return;
 
-            if (!(source.getHolder() instanceof Hopper)) {
+            if (initiator.equals(destination)) {
                 if (!hopperData.isItemAllowed(event.getItem())) {
                     event.setCancelled(true);
 
@@ -43,8 +44,6 @@ public class HopperTransferListener implements Listener {
             }
         }
     }
-
-
 
     @EventHandler
     public void onItemPickup(InventoryPickupItemEvent event) {

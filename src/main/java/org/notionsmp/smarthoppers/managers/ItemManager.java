@@ -2,6 +2,8 @@ package org.notionsmp.smarthoppers.managers;
 
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -29,10 +31,10 @@ public class ItemManager {
         hopperItem = new ItemStack(material);
         ItemMeta meta = hopperItem.getItemMeta();
 
-        meta.displayName(miniMessage.deserialize(config.getString("hopper-item.itemname")));
+        meta.displayName(parseMiniMessage(config.getString("hopper-item.itemname")));
         if (config.contains("hopper-item.lore")) {
             List<Component> lore = config.getStringList("hopper-item.lore").stream()
-                    .map(miniMessage::deserialize)
+                    .map(this::parseMiniMessage)
                     .collect(Collectors.toList());
             meta.lore(lore);
         }
@@ -49,6 +51,12 @@ public class ItemManager {
         }
 
         hopperItem.setItemMeta(meta);
+    }
+
+    private Component parseMiniMessage(String text) {
+        Component component = miniMessage.deserialize(text);
+        return component.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                .colorIfAbsent(NamedTextColor.WHITE);
     }
 
     private void applyModernComponents(ItemMeta meta, FileConfiguration config) {

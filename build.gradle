@@ -25,6 +25,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:${paperapi}")
     compileOnly("com.nexomc:nexo:${nexo}")
+    implementation("com.nexomc:protectionlib:${protectionlib}")
     compileOnly("org.projectlombok:lombok:${lombok}")
     annotationProcessor("org.projectlombok:lombok:${lombok}")
     implementation("co.aikar:acf-paper:${paperacf}")

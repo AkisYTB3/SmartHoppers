@@ -34,6 +34,7 @@ dependencies {
 shadowJar {
     relocate 'co.aikar.commands', 'org.notionsmp.smarthoppers.acf'
     relocate 'co.aikar.locales', 'org.notionsmp.smarthoppers.locales'
+    relocate 'com.nexomc.protectionlib', 'org.notionsmp.smarthoppers.protectionlib'
 
     exclude('org.projectlombok:lombok:.*', 'net.kyori:.*')
     exclude 'META-INF/**'

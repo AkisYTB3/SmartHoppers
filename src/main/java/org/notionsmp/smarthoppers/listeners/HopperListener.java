@@ -1,5 +1,6 @@
 package org.notionsmp.smarthoppers.listeners;
 
+import com.nexomc.protectionlib.ProtectionLib;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.notionsmp.smarthoppers.SmartHoppers;
+import org.notionsmp.smarthoppers.managers.ItemManager;
 import org.notionsmp.smarthoppers.utils.FilterItem;
 import org.notionsmp.smarthoppers.utils.HopperData;
 import java.util.Objects;
@@ -27,10 +29,13 @@ public class HopperListener implements Listener {
         if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
         if (!(Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Hopper hopper)) return;
         if (!event.getPlayer().hasPermission("smarthoppers.use")) return;
+        if (!ProtectionLib.canInteract(event.getPlayer(), event.getClickedBlock().getLocation())
+                || !ProtectionLib.canUse(event.getPlayer(), event.getClickedBlock().getLocation())) return;
+
         boolean useItem = SmartHoppers.getInstance().getConfigManager().getConfig().getBoolean("hopper-item.enabled");
         if (useItem) {
             ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
-            if (item.isSimilar(SmartHoppers.getInstance().getItemManager().getHopperItem())) {
+            if (ItemManager.isHopperItem(item)) {
                 event.setCancelled(true);
                 SmartHoppers.getInstance().getGuiManager().openHopperGUI(event.getPlayer(), hopper);
             }

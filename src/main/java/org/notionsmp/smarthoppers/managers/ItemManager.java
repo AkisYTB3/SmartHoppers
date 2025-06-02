@@ -1,5 +1,6 @@
 package org.notionsmp.smarthoppers.managers;
 
+import com.nexomc.nexo.api.NexoItems;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,15 +11,18 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.notionsmp.smarthoppers.SmartHoppers;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
 public class ItemManager {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private static final NamespacedKey HOPPER_KEY = new NamespacedKey(SmartHoppers.getInstance(), "hopper_item");
     private ItemStack hopperItem;
 
     public ItemManager() {
@@ -27,11 +31,26 @@ public class ItemManager {
 
     public void createHopperItem() {
         FileConfiguration config = SmartHoppers.getInstance().getConfigManager().getConfig();
-        Material material = Material.valueOf(config.getString("hopper-item.material"));
-        hopperItem = new ItemStack(material);
-        ItemMeta meta = hopperItem.getItemMeta();
+        String materialStr = config.getString("hopper-item.material");
 
-        meta.displayName(parseMiniMessage(config.getString("hopper-item.itemname")));
+        if (materialStr.startsWith("nexo-")) {
+            String id = materialStr.substring("nexo-".length());
+            try {
+                hopperItem = Objects.requireNonNull(NexoItems.itemFromId(id)).build();
+            } catch (Exception e) {
+                hopperItem = new ItemStack(Material.IRON_INGOT);
+            }
+        } else {
+            Material material = Material.valueOf(materialStr);
+            hopperItem = new ItemStack(material);
+        }
+
+        ItemMeta meta = hopperItem.getItemMeta();
+        meta.getPersistentDataContainer().set(HOPPER_KEY, PersistentDataType.BOOLEAN, true);
+
+        if (config.contains("hopper-item.itemname")) {
+            meta.displayName(parseMiniMessage(config.getString("hopper-item.itemname")));
+        }
         if (config.contains("hopper-item.lore")) {
             List<Component> lore = config.getStringList("hopper-item.lore").stream()
                     .map(this::parseMiniMessage)
@@ -41,7 +60,6 @@ public class ItemManager {
         if (config.contains("hopper-item.custom-model-data")) {
             meta.setCustomModelData(config.getInt("hopper-item.custom-model-data"));
         }
-
         if (config.getBoolean("hopper-item.Components.glint", false)) {
             meta.setEnchantmentGlintOverride(true);
         }
@@ -51,6 +69,11 @@ public class ItemManager {
         }
 
         hopperItem.setItemMeta(meta);
+    }
+
+    public static boolean isHopperItem(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        return item.getItemMeta().getPersistentDataContainer().has(HOPPER_KEY, PersistentDataType.BOOLEAN);
     }
 
     private Component parseMiniMessage(String text) {

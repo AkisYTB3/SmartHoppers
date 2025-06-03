@@ -37,9 +37,7 @@ shadowJar {
     relocate 'com.nexomc.protectionlib', 'org.notionsmp.smarthoppers.protectionlib'
 
     exclude('org.projectlombok:lombok:.*', 'net.kyori:.*')
-    exclude 'META-INF/**'
-
-    minimize()
+    exclude 'META-INF/**', "kotlin/**"
 
     archiveClassifier.set('')
 }

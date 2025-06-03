@@ -6,6 +6,7 @@ import org.bukkit.block.Hopper;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.ClickType;
@@ -31,6 +32,8 @@ public class HopperListener implements Listener {
         if (!event.getPlayer().hasPermission("smarthoppers.use")) return;
         if (!ProtectionLib.canInteract(event.getPlayer(), event.getClickedBlock().getLocation())
                 || !ProtectionLib.canUse(event.getPlayer(), event.getClickedBlock().getLocation())) return;
+
+        event.getPlayer().sendMessage(ProtectionLib.canInteract(event.getPlayer(), event.getClickedBlock().getLocation())+" "+ProtectionLib.canUse(event.getPlayer(), event.getClickedBlock().getLocation())+" "+event.getClickedBlock().getLocation());
 
         boolean useItem = SmartHoppers.getInstance().getConfigManager().getConfig().getBoolean("hopper-item.enabled");
         if (useItem) {

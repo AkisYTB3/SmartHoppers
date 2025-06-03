@@ -37,9 +37,7 @@ shadowJar {
     relocate 'com.nexomc.protectionlib', 'org.notionsmp.smarthoppers.protectionlib'
 
     exclude('org.projectlombok:lombok:.*', 'net.kyori:.*')
-    exclude 'META-INF/**'
-
-    minimize()
+    exclude 'META-INF/**', "kotlin/**"
 
     archiveClassifier.set('')
 }
@@ -76,7 +74,7 @@ processResources {
     def props = [version: version]
     inputs.properties props
     filteringCharset 'UTF-8'
-    filesMatching(['paper-plugin.yml', 'plugin.yml']) {
+    filesMatching(['paper-plugin.yml']) {
         expand props
     }
 }

@@ -4,8 +4,37 @@ main: org.notionsmp.smarthoppers.SmartHoppers
 api-version: '1.21'
 load: POSTWORLD
 author: "Akis (discord: yeahakis)"
+loader: org.notionsmp.smarthoppers.SHLoader
 dependencies:
   server:
     Nexo:
       load: BEFORE
       required: false
+    CrashClaim:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    HuskTowns:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    WorldGuard:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    Towny:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    Factions:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    Lands:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    PlotSquared:
+      load: BEFORE
+      required: false
+      join-classpath: true

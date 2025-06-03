@@ -33,8 +33,6 @@ public class HopperListener implements Listener {
         if (!ProtectionLib.canInteract(event.getPlayer(), event.getClickedBlock().getLocation())
                 || !ProtectionLib.canUse(event.getPlayer(), event.getClickedBlock().getLocation())) return;
 
-        event.getPlayer().sendMessage(ProtectionLib.canInteract(event.getPlayer(), event.getClickedBlock().getLocation())+" "+ProtectionLib.canUse(event.getPlayer(), event.getClickedBlock().getLocation())+" "+event.getClickedBlock().getLocation());
-
         boolean useItem = SmartHoppers.getInstance().getConfigManager().getConfig().getBoolean("hopper-item.enabled");
         if (useItem) {
             ItemStack item = event.getPlayer().getInventory().getItemInMainHand();

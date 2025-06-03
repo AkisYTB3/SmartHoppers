@@ -1,6 +1,7 @@
 package org.notionsmp.smarthoppers;
 
 import co.aikar.commands.PaperCommandManager;
+import com.nexomc.protectionlib.ProtectionLib;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -33,6 +34,7 @@ public final class SmartHoppers extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        ProtectionLib.init(this);
         saveDefaultConfig();
         configManager = new ConfigManager();
         guiManager = new GUIManager();

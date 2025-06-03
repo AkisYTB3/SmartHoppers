@@ -4,6 +4,10 @@ main: org.notionsmp.smarthoppers.SmartHoppers
 api-version: '1.21'
 load: POSTWORLD
 author: "Akis (discord: yeahakis)"
+permissions:
+  smarthoppers.use:
+    description: "The permission required to use the Hopper Item on Hoppers"
+    default: true
 dependencies:
   server:
     Nexo:

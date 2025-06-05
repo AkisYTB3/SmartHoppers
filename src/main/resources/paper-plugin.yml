@@ -4,6 +4,7 @@ main: org.notionsmp.smarthoppers.SmartHoppers
 api-version: '1.21'
 load: POSTWORLD
 author: "Akis (discord: yeahakis)"
+contributors: ["Naimad (discord: 4g0)"]
 loader: org.notionsmp.smarthoppers.SHLoader
 permissions:
   smarthoppers.use:

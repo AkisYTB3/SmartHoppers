@@ -3,57 +3,45 @@ package org.notionsmp.smarthoppers.utils;
 import lombok.Data;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
+
 import java.util.*;
 
 @Data
 public class HopperData implements ConfigurationSerializable {
-    private List<FilterItem> filterItems = new ArrayList<>();
+    private final List<FilterItem> filterItems = new ArrayList<>();
     private boolean whitelist = true;
     private int currentPage = 0;
     private boolean enabled = false;
 
     public void addFilterItem(ItemStack item, boolean exactMatch) {
-        FilterItem newFilter = new FilterItem(item.clone(), exactMatch);
-
-        boolean alreadyExists = filterItems.stream().anyMatch(fi -> {
-            if (exactMatch && fi.isExactMatch()) {
-                return fi.getItem().equals(newFilter.getItem());
-            } else if (!exactMatch && !fi.isExactMatch()) {
-                return fi.getItem().getType() == newFilter.getItem().getType();
-            }
-            return false;
-        });
-
-        if (!alreadyExists) {
-            filterItems.add(newFilter);
+        ItemStack clonedItem = item.clone();
+        for (FilterItem fi : filterItems) {
+            if (exactMatch && fi.isExactMatch() && fi.getItem().equals(clonedItem)) return;
+            if (!exactMatch && !fi.isExactMatch() && fi.getItem().getType() == clonedItem.getType()) return;
         }
+        filterItems.add(new FilterItem(clonedItem, exactMatch));
     }
 
     public void removeFilterItem(ItemStack item) {
         filterItems.removeIf(fi -> fi.getItem().equals(item));
     }
 
-    public FilterItem getFilterItem(ItemStack item) {
-        return filterItems.stream()
-                .filter(fi -> fi.getItem().equals(item))
-                .findFirst()
-                .orElse(null);
-    }
-
     public boolean isItemAllowed(ItemStack item) {
-        return filterItems.stream()
-                .filter(fi -> fi.isExactMatch() ? fi.getItem().equals(item) : fi.getItem().getType() == item.getType())
-                .findFirst()
-                .map(fi -> whitelist)
-                .orElse(!whitelist);
+        for (FilterItem fi : filterItems) {
+            boolean match = fi.isExactMatch()
+                    ? fi.getItem().equals(item)
+                    : fi.getItem().getType() == item.getType();
+            if (match) return whitelist;
+        }
+        return !whitelist;
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new LinkedHashMap<>();
-        List<Map<String, Object>> serializedItems = new ArrayList<>();
-        for (FilterItem item : filterItems) {
-            serializedItems.add(item.serialize());
+        List<Map<String, Object>> serializedItems = new ArrayList<>(filterItems.size());
+        for (FilterItem fi : filterItems) {
+            serializedItems.add(fi.serialize());
         }
         map.put("filterItems", serializedItems);
         map.put("whitelist", whitelist);
@@ -65,25 +53,25 @@ public class HopperData implements ConfigurationSerializable {
     @SuppressWarnings("unchecked")
     public static HopperData deserialize(Map<String, Object> map) {
         HopperData data = new HopperData();
-        if (map.containsKey("filterItems")) {
-            Object rawList = map.get("filterItems");
-            if (rawList instanceof List<?> list) {
-                for (Object itemObj : list) {
-                    if (itemObj instanceof Map<?, ?> itemMap) {
-                        data.filterItems.add(FilterItem.deserialize((Map<String, Object>) itemMap));
-                    }
+
+        Object rawList = map.get("filterItems");
+        if (rawList instanceof List<?> list) {
+            for (Object itemObj : list) {
+                if (itemObj instanceof Map<?, ?> itemMap) {
+                    data.filterItems.add(FilterItem.deserialize((Map<String, Object>) itemMap));
                 }
             }
         }
-        if (map.containsKey("whitelist")) {
-            data.whitelist = (boolean) map.get("whitelist");
-        }
-        if (map.containsKey("currentPage")) {
-            data.currentPage = (int) map.get("currentPage");
-        }
-        if (map.containsKey("enabled")) {
-            data.enabled = (boolean) map.get("enabled");
-        }
+
+        Object wl = map.get("whitelist");
+        if (wl instanceof Boolean b) data.whitelist = b;
+
+        Object page = map.get("currentPage");
+        if (page instanceof Number n) data.currentPage = n.intValue();
+
+        Object en = map.get("enabled");
+        if (en instanceof Boolean b) data.enabled = b;
+
         return data;
     }
 }

@@ -1,5 +1,6 @@
 package org.notionsmp.smarthoppers.listeners;
 
+import org.bukkit.Location;
 import org.bukkit.block.Hopper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,8 +26,8 @@ public class HopperTransferListener implements Listener {
             if (initiator.equals(destination)) {
                 if (!hopperData.isItemAllowed(event.getItem())) {
                     event.setCancelled(true);
-
-                    SmartHoppers.getInstance().getServer().getScheduler().runTaskLater(SmartHoppers.getInstance(), () -> {
+                    Location location = destHopper.getLocation();
+                    SmartHoppers.getInstance().getFoliaLib().getScheduler().runAtLocationLater(location, () -> {
                         for (ItemStack item : source.getContents()) {
                             if (item == null || item.getType().isAir()) continue;
                             if (hopperData.isItemAllowed(item)) {
@@ -34,7 +35,6 @@ public class HopperTransferListener implements Listener {
                                 cloned.setAmount(1);
 
                                 destination.addItem(cloned);
-
                                 item.setAmount(item.getAmount() - 1);
                                 break;
                             }

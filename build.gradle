@@ -20,6 +20,7 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/groups/public/' }
     maven { url 'https://repo.nexomc.com/releases' }
     maven { url 'https://repo.aikar.co/content/groups/aikar/' }
+    maven { url 'https://repo.tcoded.com/releases' }
 }
 
 dependencies {
@@ -29,14 +30,15 @@ dependencies {
     compileOnly("org.projectlombok:lombok:${lombok}")
     annotationProcessor("org.projectlombok:lombok:${lombok}")
     implementation("co.aikar:acf-paper:${paperacf}")
+    implementation("com.tcoded:FoliaLib:${folialib}")
 }
 
 shadowJar {
     relocate 'co.aikar.commands', 'org.notionsmp.smarthoppers.acf'
     relocate 'co.aikar.locales', 'org.notionsmp.smarthoppers.locales'
     relocate 'com.nexomc.protectionlib', 'org.notionsmp.smarthoppers.protectionlib'
+    relocate 'com.tcoded.folialib', 'org.notionsmp.smarthoppers.folialib'
 
-    exclude('org.projectlombok:lombok:.*', 'net.kyori:.*')
     exclude 'META-INF/**', "kotlin/**"
 
     archiveClassifier.set('')

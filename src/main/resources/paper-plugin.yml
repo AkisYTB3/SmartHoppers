@@ -6,6 +6,7 @@ load: POSTWORLD
 author: "Akis (discord: yeahakis)"
 contributors: ["Naimad (discord: 4g0)"]
 loader: org.notionsmp.smarthoppers.SHLoader
+folia-supported: true
 permissions:
   smarthoppers.use:
     description: "The permission required to use the Hopper Item on Hoppers"

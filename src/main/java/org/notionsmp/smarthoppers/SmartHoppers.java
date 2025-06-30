@@ -2,6 +2,7 @@ package org.notionsmp.smarthoppers;
 
 import co.aikar.commands.PaperCommandManager;
 import com.nexomc.protectionlib.ProtectionLib;
+import com.tcoded.folialib.FoliaLib;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -30,9 +31,11 @@ public final class SmartHoppers extends JavaPlugin {
     private GUIManager guiManager;
     private ItemManager itemManager;
     private PaperCommandManager commandManager;
+    private FoliaLib foliaLib;
 
     @Override
     public void onEnable() {
+        foliaLib = new FoliaLib(this);
         instance = this;
         ProtectionLib.init(this);
         saveDefaultConfig();

@@ -24,6 +24,8 @@ public class ItemManager {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
     private static final NamespacedKey HOPPER_KEY = new NamespacedKey(SmartHoppers.getInstance(), "hopper_item");
     private ItemStack hopperItem;
+    private boolean isNexoItem = false;
+    private String nexoItemId = null;
 
     public ItemManager() {
         createHopperItem();
@@ -34,19 +36,25 @@ public class ItemManager {
         String materialStr = config.getString("hopper-item.material");
 
         if (materialStr.startsWith("nexo-")) {
-            String id = materialStr.substring("nexo-".length());
+            nexoItemId = materialStr.substring("nexo-".length());
             try {
-                hopperItem = Objects.requireNonNull(NexoItems.itemFromId(id)).build();
+                hopperItem = Objects.requireNonNull(NexoItems.itemFromId(nexoItemId)).build();
+                isNexoItem = true;
             } catch (Exception e) {
                 hopperItem = new ItemStack(Material.IRON_INGOT);
+                isNexoItem = false;
             }
         } else {
             Material material = Material.valueOf(materialStr);
             hopperItem = new ItemStack(material);
+            isNexoItem = false;
         }
 
         ItemMeta meta = hopperItem.getItemMeta();
-        meta.getPersistentDataContainer().set(HOPPER_KEY, PersistentDataType.BOOLEAN, true);
+
+        if (!isNexoItem) {
+            meta.getPersistentDataContainer().set(HOPPER_KEY, PersistentDataType.BOOLEAN, true);
+        }
 
         if (config.contains("hopper-item.itemname")) {
             meta.displayName(parseMiniMessage(config.getString("hopper-item.itemname")));
@@ -72,8 +80,16 @@ public class ItemManager {
     }
 
     public static boolean isHopperItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return false;
-        return item.getItemMeta().getPersistentDataContainer().has(HOPPER_KEY, PersistentDataType.BOOLEAN);
+        if (item == null) return false;
+
+        String nexoId = NexoItems.idFromItem(item);
+        if (nexoId != null) {
+            ItemManager instance = SmartHoppers.getInstance().getItemManager();
+            return nexoId.equals(instance.nexoItemId);
+        }
+
+        return item.hasItemMeta() &&
+                item.getItemMeta().getPersistentDataContainer().has(HOPPER_KEY, PersistentDataType.BOOLEAN);
     }
 
     private Component parseMiniMessage(String text) {

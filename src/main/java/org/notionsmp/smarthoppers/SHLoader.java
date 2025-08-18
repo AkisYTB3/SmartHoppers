@@ -22,15 +22,16 @@ public class SHLoader implements PluginLoader {
 
     MavenLibraryResolver resolver = new MavenLibraryResolver();
 
+    String url;
+
     try {
-      Field mirrorField = MavenLibraryResolver.class.getField("MAVEN_CENTRAL_DEFAULT_MIRROR");
-      Object mirrorRepo = mirrorField.get(null);
-      if (mirrorRepo instanceof RemoteRepository) {
-        resolver.addRepository((RemoteRepository) mirrorRepo);
-      }
+      Field f = MavenLibraryResolver.class.getField("MAVEN_CENTRAL_DEFAULT_MIRROR");
+      url = (String) f.get(null);
     } catch (NoSuchFieldException | IllegalAccessException e) {
-      resolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
+      url = "https://repo1.maven.org/maven2/";
     }
+
+    resolver.addRepository(new RemoteRepository.Builder("central", "default", url).build());
 
     for (String dep : DEPENDS) {
       resolver.addDependency(new Dependency(new DefaultArtifact(dep), null));

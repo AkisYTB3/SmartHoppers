@@ -28,7 +28,6 @@ public class SHLoader implements PluginLoader {
       if (mirrorRepo instanceof RemoteRepository) {
         resolver.addRepository((RemoteRepository) mirrorRepo);
       }
-      SmartHoppers.getInstance().getLogger().info("MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR found, using it to comply with ToS of the Maven Central");
     } catch (NoSuchFieldException | IllegalAccessException e) {
       resolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
     }

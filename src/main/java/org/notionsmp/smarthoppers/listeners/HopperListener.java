@@ -82,7 +82,8 @@ public class HopperListener implements Listener {
         } else if (clickedInventoryType == InventoryType.PLAYER && clickedItem != null && !clickedItem.getType().isAir()) {
             ItemStack singleItem = clickedItem.clone();
             singleItem.setAmount(1);
-            hopperData.addFilterItem(singleItem, false);
+            boolean exactMatch = event.getClick().isShiftClick();
+            hopperData.addFilterItem(singleItem, exactMatch);
             SmartHoppers.getInstance().getGuiManager().refreshHopperGUI(player, (Hopper) event.getInventory().getHolder());
         }
     }
